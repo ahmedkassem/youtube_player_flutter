@@ -402,7 +402,8 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
                                 ),
                                 const RemainingDuration(),
                                 const PlaybackSpeedButton(),
-                                const FullScreenButton(),
+                                const SizedBox(width: 30),
+                                // const FullScreenButton(),
                               ],
                         ),
                       ),
@@ -435,7 +436,7 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
             ),
           if (controller.value.hasError) errorWidget,
           if (widget.showCaptionControls)
-            CaptionControls(
+            const CaptionControls(
               iconColor: Colors.white,
               iconSize: 22.0,
             ),
