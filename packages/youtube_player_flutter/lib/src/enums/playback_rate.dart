@@ -21,12 +21,12 @@ class PlaybackRate {
   /// Sets playback rate to 1.0 times.
   static const double normal = 1.0;
 
-  /// Sets playback rate to 0.75 times.
-  static const double threeQuarter = 0.75;
+  // /// Sets playback rate to 0.75 times.
+  // static const double threeQuarter = 0.75;
 
-  /// Sets playback rate to 0.5 times.
-  static const double half = 0.5;
+  // /// Sets playback rate to 0.5 times.
+  // static const double half = 0.5;
 
-  /// Sets playback rate to 0.25 times.
-  static const double quarter = 0.25;
+  // /// Sets playback rate to 0.25 times.
+  // static const double quarter = 0.25;
 }
