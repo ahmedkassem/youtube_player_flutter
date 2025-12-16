@@ -130,8 +130,10 @@ class _PlayPauseButtonState extends State<PlayPauseButton>
   }
 
   bool _showPlayPause(PlayerState state) {
-    // Show play/pause button once the video is ready to play
-    // Show loading indicator while the video is loading (not ready)
-    return _controller.value.isReady;
+    // Show loading indicator when:
+    // 1. Video is not ready (initial loading)
+    // 2. Video is buffering (seeking/loading more data)
+    // Show play/pause button in all other ready states
+    return _controller.value.isReady && state != PlayerState.buffering;
   }
 }
