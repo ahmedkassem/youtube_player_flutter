@@ -130,8 +130,11 @@ class _PlayPauseButtonState extends State<PlayPauseButton>
   }
 
   bool _showPlayPause(PlayerState state) {
-    return (!_controller.flags.autoPlay && _controller.value.isReady) ||
-        state == PlayerState.playing ||
-        state == PlayerState.paused;
+    // Show play/pause button when video is ready and playing/paused, or when
+    // autoPlay is false and video is ready (to allow user to start playback)
+    return _controller.value.isReady &&
+        (state == PlayerState.playing ||
+            state == PlayerState.paused ||
+            state == PlayerState.cued);
   }
 }
