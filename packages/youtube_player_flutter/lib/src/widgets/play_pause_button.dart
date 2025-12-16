@@ -131,14 +131,14 @@ class _PlayPauseButtonState extends State<PlayPauseButton>
 
   bool _showPlayPause(PlayerState state) {
     // Show play/pause button when:
-    // 1. AutoPlay is disabled and player is ready (including cued state)
+    // 1. AutoPlay is disabled and player is in cued state (ready to play but not started)
     // 2. Player is playing
     // 3. Player is paused
     // Note: We don't show the button during buffering, unStarted, or unknown states
     // to ensure the loading container is displayed
-    return (!_controller.flags.autoPlay && _controller.value.isReady) ||
+    return (!_controller.flags.autoPlay && state == PlayerState.cued) ||
         state == PlayerState.playing ||
         state == PlayerState.paused ||
-        state == PlayerState.cued;
+        (_controller.flags.autoPlay && _controller.value.isReady);
   }
 }
