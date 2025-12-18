@@ -216,6 +216,38 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
     }
   }
 
+  /// Cues the video using the [mediaContentUrl] provided.
+  void cueVideoByUrl({
+    required String mediaContentUrl,
+    int startAt = 0,
+    int? endAt,
+  }) {
+    var cueParams = 'mediaContentUrl:"$mediaContentUrl",startSeconds:$startAt';
+    if (endAt != null && endAt > startAt) {
+      cueParams += ',endSeconds:$endAt';
+    }
+    updateValue(
+      value.copyWith(errorCode: 0, hasPlayed: false),
+    );
+    _callMethod('cueVideoByUrl({$cueParams})');
+  }
+
+  /// Loads the video using the [mediaContentUrl] provided.
+  void loadVideoByUrl({
+    required String mediaContentUrl,
+    int startAt = 0,
+    int? endAt,
+  }) {
+    var loadParams = 'mediaContentUrl:"$mediaContentUrl",startSeconds:$startAt';
+    if (endAt != null && endAt > startAt) {
+      loadParams += ',endSeconds:$endAt';
+    }
+    updateValue(
+      value.copyWith(errorCode: 0, hasPlayed: false),
+    );
+    _callMethod('loadVideoByUrl({$loadParams})');
+  }
+
   void _updateValues(String id) {
     if (id.length != 11) {
       updateValue(
