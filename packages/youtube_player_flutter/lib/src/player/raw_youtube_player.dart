@@ -277,7 +277,13 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'end': ${controller!.flags.endAt}
                     },
                     events: {
-                        onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
+                        onReady: function(event) {
+                            var iframe = document.getElementById('player');
+                            if (iframe) {
+                                iframe.setAttribute('referrerPolicy', 'strict-origin-when-cross-origin');
+                            }
+                            window.flutter_inappwebview.callHandler('Ready');
+                        },
                         onStateChange: function(event) { sendPlayerStateChange(event.data); },
                         onPlaybackQualityChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackQualityChange', event.data); },
                         onPlaybackRateChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data); },
@@ -328,6 +334,16 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
             function cueById(cueSettings) {
                 player.cueVideoById(cueSettings);
+                return '';
+            }
+
+            function loadVideoByUrl(loadSettings) {
+                player.loadVideoByUrl(loadSettings);
+                return '';
+            }
+
+            function cueVideoByUrl(cueSettings) {
+                player.cueVideoByUrl(cueSettings);
                 return '';
             }
 
