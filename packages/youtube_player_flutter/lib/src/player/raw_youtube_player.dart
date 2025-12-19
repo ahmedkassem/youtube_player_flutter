@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -32,6 +35,10 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   PlayerState? _cachedPlayerState;
   bool _isPlayerReady = false;
   bool _onLoadStopCalled = false;
+
+  /// Returns true if running on Windows desktop (not web).
+  /// Windows WebView2 requires different HTML loading approach.
+  bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
 
   @override
   void initState() {
@@ -71,12 +78,18 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
       ignoring: true,
       child: InAppWebView(
         key: widget.key,
-        initialData: InAppWebViewInitialData(
-          data: player,
-          encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
-          mimeType: 'text/html',
-        ),
+        // On Windows, initialData doesn't work properly with WebView2.
+        // We use initialUrlRequest with about:blank and load HTML in onWebViewCreated.
+        initialData: _isWindowsDesktop
+            ? null
+            : InAppWebViewInitialData(
+                data: player,
+                encoding: 'utf-8',
+                baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+                mimeType: 'text/html',
+              ),
+        initialUrlRequest:
+            _isWindowsDesktop ? URLRequest(url: WebUri('about:blank')) : null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
           mediaPlaybackRequiresUserGesture: false,
@@ -95,6 +108,18 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
           controller!.updateValue(
             controller!.value.copyWith(webViewController: webController),
           );
+
+          // On Windows, load the HTML content after webview is created.
+          // This approach works better with WebView2 than initialData.
+          if (_isWindowsDesktop) {
+            webController.loadData(
+              data: player,
+              mimeType: 'text/html',
+              encoding: 'utf-8',
+              baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
+            );
+          }
+
           webController
             ..addJavaScriptHandler(
               handlerName: 'Ready',
