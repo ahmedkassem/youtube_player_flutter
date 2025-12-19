@@ -263,7 +263,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         },
         onLoadStop: (_, __) {
           _onLoadStopCalled = true;
-          if (_isPlayerReady) {
+          // On Windows with direct embed URL, JavaScript handlers don't fire,
+          // so we consider the player ready when the page finishes loading.
+          if (_isPlayerReady || _isWindowsDesktop) {
             controller!.updateValue(
               controller!.value.copyWith(isReady: true),
             );
