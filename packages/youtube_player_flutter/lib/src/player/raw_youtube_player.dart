@@ -103,7 +103,8 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   Widget build(BuildContext context) {
     controller = YoutubePlayerController.of(context);
     return IgnorePointer(
-      ignoring: true,
+      // On Windows, don't ignore pointer so we can see if there are errors
+      ignoring: !_isWindowsDesktop,
       child: InAppWebView(
         key: widget.key,
         // On Windows, use YouTube's embed URL directly since WebView2
