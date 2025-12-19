@@ -246,6 +246,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
             }
         </style>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+        <meta name="referrer" content="strict-origin-when-cross-origin">
     </head>
     <body>
         <div id="player"></div>
@@ -261,7 +262,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                     height: '100%',
                     width: '100%',
                     videoId: '${controller!.initialVideoId}',
+                    host: 'https://youtube-nocookie.com',
                     playerVars: {
+                        'origin': 'https://youtube-nocookie.com',
                         'controls': 0,
                         'playsinline': 1,
                         'enablejsapi': 1,
