@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -39,34 +40,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   /// Returns true if running on Windows desktop (not web).
   /// Windows WebView2 requires different HTML loading approach.
   bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
-
-  /// Constructs a direct YouTube embed URL for Windows.
-  /// Windows WebView2 cannot render data: URLs properly, so we load
-  /// YouTube's embed page directly with parameters in the URL.
-  String get _windowsEmbedUrl {
-    final videoId = controller!.initialVideoId;
-    final flags = controller!.flags;
-    final params = <String, String>{
-      'controls': '0',
-      'playsinline': '1',
-      'enablejsapi': '1',
-      'fs': '0',
-      'rel': '0',
-      'showinfo': '0',
-      'iv_load_policy': '3',
-      'modestbranding': '1',
-      'cc_load_policy': flags.enableCaption ? '1' : '0',
-      'cc_lang_pref': flags.captionLanguage,
-      'autoplay': flags.autoPlay ? '1' : '0',
-      if (flags.startAt > 0) 'start': flags.startAt.toString(),
-      if (flags.endAt != null) 'end': flags.endAt.toString(),
-      // 'origin': 'https://www.youtube.com', // Removing origin as it might cause Error 153 on direct load
-    };
-    final queryString = params.entries
-        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-        .join('&');
-    return 'https://www.youtube-nocookie.com/embed/$videoId?$queryString';
-  }
 
   @override
   void initState() {
@@ -120,8 +93,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
               ),
         initialUrlRequest: _isWindowsDesktop
             ? URLRequest(
-                url: WebUri(_windowsEmbedUrl),
-                headers: {'Referer': 'https://www.youtube-nocookie.com/'},
+                url: WebUri(
+                  'data:text/html;charset=utf-8;base64,${base64Encode(const Utf8Encoder().convert(player))}',
+                ),
               )
             : null,
         initialSettings: InAppWebViewSettings(
@@ -306,7 +280,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         <div id="player"></div>
         <script>
             var tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
+            tag.src = "https://www.youtube-nocookie.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             var player;

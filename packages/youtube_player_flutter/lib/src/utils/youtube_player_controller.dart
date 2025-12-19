@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -172,120 +170,11 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
         ?.controller;
   }
 
-  /// Returns true if running on Windows desktop (not web).
-  bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
-
   void _callMethod(String methodString) {
     if (value.isReady) {
-      if (_isWindowsDesktop) {
-        // On Windows, we use YouTube's embed page directly.
-        // Control it via postMessage API.
-        _callWindowsMethod(methodString);
-      } else {
-        value.webViewController?.evaluateJavascript(source: methodString);
-      }
+      value.webViewController?.evaluateJavascript(source: methodString);
     } else {
       log('The controller is not ready for method calls.');
-    }
-  }
-
-  /// Calls YouTube player methods on Windows via postMessage API.
-  /// YouTube's embed page listens for postMessage commands.
-  void _callWindowsMethod(String methodString) {
-    // Map our method calls to YouTube's player API methods
-    String? jsCommand;
-
-    if (methodString == 'play()') {
-      if (_isWindowsDesktop) {
-        updateValue(
-          value.copyWith(playerState: PlayerState.playing, isPlaying: true),
-        );
-      }
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.playVideo) { 
-          p.playVideo(); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.play();
-        }
-      ''';
-    } else if (methodString == 'pause()') {
-      if (_isWindowsDesktop) {
-        updateValue(
-          value.copyWith(playerState: PlayerState.paused, isPlaying: false),
-        );
-      }
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.pauseVideo) { 
-          p.pauseVideo(); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.pause();
-        }
-      ''';
-    } else if (methodString == 'mute()') {
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.mute) { 
-          p.mute(); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.muted = true;
-        }
-      ''';
-    } else if (methodString == 'unMute()') {
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.unMute) { 
-          p.unMute(); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.muted = false;
-        }
-      ''';
-    } else if (methodString.startsWith('seekTo(')) {
-      final match = RegExp(r'seekTo\(([^,]+)').firstMatch(methodString);
-      final seconds = match?.group(1) ?? '0';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.seekTo) { 
-          p.seekTo($seconds, true); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.currentTime = $seconds;
-        }
-      ''';
-    } else if (methodString.startsWith('setVolume(')) {
-      final match = RegExp(r'setVolume\((\d+)\)').firstMatch(methodString);
-      final volume = match?.group(1) ?? '100';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.setVolume) { 
-          p.setVolume($volume); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.volume = $volume / 100;
-        }
-      ''';
-    } else if (methodString.startsWith('setPlaybackRate(')) {
-      final match =
-          RegExp(r'setPlaybackRate\(([^)]+)\)').firstMatch(methodString);
-      final rate = match?.group(1) ?? '1';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.setPlaybackRate) { 
-          p.setPlaybackRate($rate); 
-        } else {
-          var video = document.querySelector('video');
-          if (video) video.playbackRate = $rate;
-        }
-      ''';
-    }
-
-    if (jsCommand != null) {
-      value.webViewController?.evaluateJavascript(source: jsCommand);
     }
   }
 
