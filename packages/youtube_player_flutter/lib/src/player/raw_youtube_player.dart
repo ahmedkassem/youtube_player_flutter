@@ -193,15 +193,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                     ? args.first
                     : int.tryParse(args.first) ?? -1;
                 print('YouTube Error Received: $errorCode');
-                if (errorCode == 153) {
-                  print('Attempting to recover from error 153...');
-                  // Force a reload after a short delay
-                  Future.delayed(Duration(seconds: 2), () {
-                    if (controller!.value.isReady) {
-                      controller!.reload();
-                    }
-                  });
-                }
                 controller!.updateValue(
                   controller!.value.copyWith(errorCode: errorCode),
                 );
@@ -306,7 +297,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         onPlaybackRateChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data); },
                         onError: function(error) {
                             console.log('YouTube Player Error:', error.data);
-                            handlePlayerError(error.data);
                             window.flutter_inappwebview.callHandler('Errors', error.data);
                         }
                     },
@@ -322,22 +312,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 }
             }
 
-            // Add error recovery mechanism
-            function handlePlayerError(errorCode) {
-                console.log('Handling YouTube error:', errorCode);
-                if (errorCode === 153) {
-                    // Try to reload the player with different parameters
-                    setTimeout(function() {
-                        if (player && player.loadVideoById) {
-                            console.log('Attempting to reload video after error 153');
-                            player.loadVideoById({
-                                videoId: '${controller!.initialVideoId}',
-                                startSeconds: ${controller!.flags.startAt}
-                            });
-                        }
-                    }, 1000);
-                }
-            }
 
             function sendVideoData(player) {
                 var videoData = {
