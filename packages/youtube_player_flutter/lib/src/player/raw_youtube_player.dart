@@ -60,7 +60,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
       'autoplay': flags.autoPlay ? '1' : '0',
       if (flags.startAt > 0) 'start': flags.startAt.toString(),
       if (flags.endAt != null) 'end': flags.endAt.toString(),
-      'origin': 'https://www.youtube.com',
+      // 'origin': 'https://www.youtube.com', // Removing origin as it might cause Error 153 on direct load
     };
     final queryString = params.entries
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
@@ -119,7 +119,10 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 mimeType: 'text/html',
               ),
         initialUrlRequest: _isWindowsDesktop
-            ? URLRequest(url: WebUri(_windowsEmbedUrl))
+            ? URLRequest(
+                url: WebUri(_windowsEmbedUrl),
+                headers: {'Referer': 'https://www.youtube.com/'},
+              )
             : null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
