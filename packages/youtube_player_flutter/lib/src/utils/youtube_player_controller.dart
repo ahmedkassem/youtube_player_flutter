@@ -4,9 +4,6 @@
 
 import 'dart:developer';
 
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -173,81 +170,11 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
         ?.controller;
   }
 
-  /// Returns true if running on Windows desktop (not web).
-  bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
-
   void _callMethod(String methodString) {
     if (value.isReady) {
-      if (_isWindowsDesktop) {
-        _callWindowsMethod(methodString);
-      } else {
-        value.webViewController?.evaluateJavascript(source: methodString);
-      }
+      value.webViewController?.evaluateJavascript(source: methodString);
     } else {
       log('The controller is not ready for method calls.');
-    }
-  }
-
-  void _callWindowsMethod(String methodString) {
-    String? jsCommand;
-    if (methodString == 'play()') {
-      if (_isWindowsDesktop) {
-        updateValue(
-          value.copyWith(playerState: PlayerState.playing, isPlaying: true),
-        );
-      }
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.playVideo) { p.playVideo(); } 
-        else { var v = document.querySelector('video'); if (v) v.play(); }
-      ''';
-    } else if (methodString == 'pause()') {
-      if (_isWindowsDesktop) {
-        updateValue(
-          value.copyWith(playerState: PlayerState.paused, isPlaying: false),
-        );
-      }
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.pauseVideo) { p.pauseVideo(); } 
-        else { var v = document.querySelector('video'); if (v) v.pause(); }
-      ''';
-    } else if (methodString == 'mute()') {
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.mute) { p.mute(); }
-      ''';
-    } else if (methodString == 'unMute()') {
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.unMute) { p.unMute(); }
-      ''';
-    } else if (methodString.startsWith('seekTo(')) {
-      final match = RegExp(r'seekTo\(([^,]+)').firstMatch(methodString);
-      final seconds = match?.group(1) ?? '0';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.seekTo) { p.seekTo($seconds, true); }
-      ''';
-    } else if (methodString.startsWith('setVolume(')) {
-      final match = RegExp(r'setVolume\((\d+)\)').firstMatch(methodString);
-      final volume = match?.group(1) ?? '100';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.setVolume) { p.setVolume($volume); }
-      ''';
-    } else if (methodString.startsWith('setPlaybackRate(')) {
-      final match =
-          RegExp(r'setPlaybackRate\(([^)]+)\)').firstMatch(methodString);
-      final rate = match?.group(1) ?? '1';
-      jsCommand = '''
-        var p = document.getElementById('movie_player');
-        if (p && p.setPlaybackRate) { p.setPlaybackRate($rate); }
-      ''';
-    }
-
-    if (jsCommand != null) {
-      value.webViewController?.evaluateJavascript(source: jsCommand);
     }
   }
 
