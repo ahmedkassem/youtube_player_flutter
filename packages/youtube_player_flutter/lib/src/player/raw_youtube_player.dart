@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
+          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -246,6 +246,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
             }
         </style>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+        <meta name='referrer' content='strict-origin-when-cross-origin'>
     </head>
     <body>
         <div id="player"></div>
@@ -275,9 +276,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'autoplay': ${boolean(value: controller!.flags.autoPlay)},
                         'start': ${controller!.flags.startAt},
                         'end': ${controller!.flags.endAt},
-                        'origin': 'https://www.youtube.com',
-                        'widget_referrer': 'https://www.youtube.com',
-                        'host': 'https://www.youtube.com'
+                        'origin': 'https://www.youtube-nocookie.com',
+                        'widget_referrer': 'https://www.youtube-nocookie.com',
+                        'host': 'https://www.youtube-nocookie.com'
                     },
                     events: {
                         onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
