@@ -74,6 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
+          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -288,7 +289,8 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'cc_lang_pref': '${controller!.flags.captionLanguage}',
                         'autoplay': ${boolean(value: controller!.flags.autoPlay)},
                         'start': ${controller!.flags.startAt},
-                        'end': ${controller!.flags.endAt}
+                        'end': ${controller!.flags.endAt},
+                        'origin': 'https://www.youtube.com'
                     },
                     events: {
                         onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
@@ -426,7 +428,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
     if (controller!.flags.forceHD) {
       return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36';
     }
-    // Use a Windows Chrome user agent for better compatibility on Windows
-    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    // Use a more generic Chrome user agent that works better with YouTube embeds
+    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
   }
 }
