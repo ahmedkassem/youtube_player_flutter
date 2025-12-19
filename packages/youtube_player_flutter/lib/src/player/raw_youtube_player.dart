@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
+          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -246,7 +246,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
             }
         </style>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-        <meta name="referrer" content="strict-origin-when-cross-origin">
     </head>
     <body>
         <div id="player"></div>
@@ -261,9 +260,8 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 player = new YT.Player('player', {
                     height: '100%',
                     width: '100%',
-                    videoId: '${!controller!.initialVideoId.contains('-') ? controller!.initialVideoId : ""}',
+                    videoId: '${controller!.initialVideoId}',
                     playerVars: {
-                        'origin': 'https://www.youtube.com',
                         'controls': 0,
                         'playsinline': 1,
                         'enablejsapi': 1,
@@ -279,20 +277,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'end': ${controller!.flags.endAt}
                     },
                     events: {
-                        onReady: function(event) {
-                            var iframe = document.getElementById('player');
-                            if (iframe) {
-                                iframe.setAttribute('referrerPolicy', 'strict-origin-when-cross-origin');
-                            }
-                            if ('${controller!.initialVideoId}'.indexOf('-') > -1) {
-                                cueVideoByUrl({
-                                    mediaContentUrl: 'https://www.youtube.com/v/${controller!.initialVideoId}?version=5',
-                                    startSeconds: ${controller!.flags.startAt},
-                                    endSeconds: ${controller!.flags.endAt ?? 'undefined'}
-                                });
-                            }
-                            window.flutter_inappwebview.callHandler('Ready');
-                        },
+                        onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
                         onStateChange: function(event) { sendPlayerStateChange(event.data); },
                         onPlaybackQualityChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackQualityChange', event.data); },
                         onPlaybackRateChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data); },
@@ -343,16 +328,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
             function cueById(cueSettings) {
                 player.cueVideoById(cueSettings);
-                return '';
-            }
-
-            function loadVideoByUrl(loadSettings) {
-                player.loadVideoByUrl(loadSettings);
-                return '';
-            }
-
-            function cueVideoByUrl(cueSettings) {
-                player.cueVideoByUrl(cueSettings);
                 return '';
             }
 

@@ -190,14 +190,6 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
 
   /// Loads the video as per the [videoId] provided.
   void load(String videoId, {int startAt = 0, int? endAt}) {
-    if (videoId.contains('-')) {
-      loadVideoByUrl(
-        mediaContentUrl: 'https://www.youtube.com/v/$videoId?version=5',
-        startAt: startAt,
-        endAt: endAt,
-      );
-      return;
-    }
     var loadParams = 'videoId:"$videoId",startSeconds:$startAt';
     if (endAt != null && endAt > startAt) {
       loadParams += ',endSeconds:$endAt';
@@ -212,14 +204,6 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
 
   /// Cues the video as per the [videoId] provided.
   void cue(String videoId, {int startAt = 0, int? endAt}) {
-    if (videoId.contains('-')) {
-      cueVideoByUrl(
-        mediaContentUrl: 'https://www.youtube.com/v/$videoId?version=3',
-        startAt: startAt,
-        endAt: endAt,
-      );
-      return;
-    }
     var cueParams = 'videoId:"$videoId",startSeconds:$startAt';
     if (endAt != null && endAt > startAt) {
       cueParams += ',endSeconds:$endAt';
@@ -230,38 +214,6 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
     } else {
       _callMethod('cueById({$cueParams})');
     }
-  }
-
-  /// Cues the video using the [mediaContentUrl] provided.
-  void cueVideoByUrl({
-    required String mediaContentUrl,
-    int startAt = 0,
-    int? endAt,
-  }) {
-    var cueParams = 'mediaContentUrl:"$mediaContentUrl",startSeconds:$startAt';
-    if (endAt != null && endAt > startAt) {
-      cueParams += ',endSeconds:$endAt';
-    }
-    updateValue(
-      value.copyWith(errorCode: 0, hasPlayed: false),
-    );
-    _callMethod('cueVideoByUrl({$cueParams})');
-  }
-
-  /// Loads the video using the [mediaContentUrl] provided.
-  void loadVideoByUrl({
-    required String mediaContentUrl,
-    int startAt = 0,
-    int? endAt,
-  }) {
-    var loadParams = 'mediaContentUrl:"$mediaContentUrl",startSeconds:$startAt';
-    if (endAt != null && endAt > startAt) {
-      loadParams += ',endSeconds:$endAt';
-    }
-    updateValue(
-      value.copyWith(errorCode: 0, hasPlayed: false),
-    );
-    _callMethod('loadVideoByUrl({$loadParams})');
   }
 
   void _updateValues(String id) {
