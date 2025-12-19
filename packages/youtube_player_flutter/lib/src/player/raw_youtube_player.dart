@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -35,8 +32,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   PlayerState? _cachedPlayerState;
   bool _isPlayerReady = false;
   bool _onLoadStopCalled = false;
-
-  bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
 
   @override
   void initState() {
@@ -73,20 +68,15 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   Widget build(BuildContext context) {
     controller = YoutubePlayerController.of(context);
     return IgnorePointer(
-      // On Windows, don't ignore pointer so we can see if there are errors
-      ignoring: !_isWindowsDesktop,
+      ignoring: true,
       child: InAppWebView(
         key: widget.key,
-        // On Windows, use YouTube's embed URL directly since WebView2
-        // cannot properly render HTML from data: URLs or loadData().
-        // For other platforms, use the IFrame API approach with initialData.
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
           baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
           mimeType: 'text/html',
         ),
-        initialUrlRequest: null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
           mediaPlaybackRequiresUserGesture: false,
@@ -105,7 +95,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
           controller!.updateValue(
             controller!.value.copyWith(webViewController: webController),
           );
-
           webController
             ..addJavaScriptHandler(
               handlerName: 'Ready',
@@ -229,15 +218,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         },
         onLoadStop: (_, __) {
           _onLoadStopCalled = true;
-          // On Windows with direct embed URL, JavaScript handlers don't fire,
-          // so we consider the player ready when the page finishes loading.
-          if (_isPlayerReady || _isWindowsDesktop) {
+          if (_isPlayerReady) {
             controller!.updateValue(
-              controller!.value.copyWith(
-                isReady: true,
-                // On Windows, also set playerState to cued so play button shows
-                playerState: _isWindowsDesktop ? PlayerState.cued : null,
-              ),
+              controller!.value.copyWith(isReady: true),
             );
           }
         },
@@ -263,13 +246,12 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
             }
         </style>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-        <meta name='referrer' content='strict-origin-when-cross-origin'>
     </head>
     <body>
         <div id="player"></div>
         <script>
             var tag = document.createElement('script');
-            tag.src = "https://www.youtube-nocookie.com/iframe_api";
+            tag.src = "https://www.youtube.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             var player;
@@ -292,10 +274,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'cc_lang_pref': '${controller!.flags.captionLanguage}',
                         'autoplay': ${boolean(value: controller!.flags.autoPlay)},
                         'start': ${controller!.flags.startAt},
-                        'end': ${controller!.flags.endAt},
-                        'origin': 'https://www.youtube-nocookie.com',
-                        'widget_referrer': 'https://www.youtube-nocookie.com',
-                        'host': 'https://www.youtube-nocookie.com'
+                        'end': ${controller!.flags.endAt}
                     },
                     events: {
                         onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
@@ -333,20 +312,12 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
             }
 
             function play() {
-                if (player && typeof player.playVideo === 'function') {
-                    player.playVideo();
-                } else {
-                    setTimeout(play, 100);
-                }
+                player.playVideo();
                 return '';
             }
 
             function pause() {
-                if (player && typeof player.pauseVideo === 'function') {
-                    player.pauseVideo();
-                } else {
-                    setTimeout(pause, 100);
-                }
+                player.pauseVideo();
                 return '';
             }
 
@@ -433,12 +404,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
   String boolean({required bool value}) => value == true ? "'1'" : "'0'";
 
-  String get userAgent {
-    if (_isWindowsDesktop) {
-      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    }
-    return controller!.flags.forceHD
-        ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-        : '';
-  }
+  String get userAgent => controller!.flags.forceHD
+      ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+      : '';
 }
