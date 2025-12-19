@@ -19,6 +19,8 @@ String errorString(int errorCode, {String videoId = ''}) {
       return 'Exact error cannot be determined for this video.';
     case 150:
       return 'Playback on other apps has been disabled by the video owner.';
+    case 153:
+      return 'This video is restricted from playback on this platform or region.';
     default:
       return 'Unknown Error';
   }

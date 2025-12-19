@@ -28,6 +28,9 @@ enum YoutubeError {
   /// This error is the same as [YoutubeError.notEmbeddable] in disguise!
   sameAsNotEmbeddable(150),
 
+  /// This video is restricted from playback on this platform or region.
+  restrictedPlayback(153),
+
   /// Unknown Error
   unknown(-1);
 
@@ -53,6 +56,8 @@ YoutubeError errorEnum(int errorCode) {
       return YoutubeError.cannotFindVideo;
     case 150:
       return YoutubeError.sameAsNotEmbeddable;
+    case 153:
+      return YoutubeError.restrictedPlayback;
     default:
       return YoutubeError.unknown;
   }

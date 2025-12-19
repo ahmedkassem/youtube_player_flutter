@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+          baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -90,6 +90,11 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
           allowsPictureInPictureMediaPlayback: true,
           useWideViewPort: false,
           useHybridComposition: controller!.flags.useHybridComposition,
+          javaScriptEnabled: true,
+          domStorageEnabled: true,
+          useShouldOverrideUrlLoading: true,
+          useOnLoadResource: true,
+          javaScriptCanOpenWindowsAutomatically: true,
         ),
         onWebViewCreated: (webController) {
           controller!.updateValue(
@@ -188,6 +193,16 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 final errorCode = args.first is int
                     ? args.first
                     : int.tryParse(args.first) ?? -1;
+                print('YouTube Error Received: $errorCode');
+                if (errorCode == 153) {
+                  print('Attempting to recover from error 153...');
+                  // Force a reload after a short delay
+                  Future.delayed(Duration(seconds: 2), () {
+                    if (controller!.value.isReady) {
+                      controller!.reload();
+                    }
+                  });
+                }
                 controller!.updateValue(
                   controller!.value.copyWith(errorCode: errorCode),
                 );
@@ -223,6 +238,15 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
               controller!.value.copyWith(isReady: true),
             );
           }
+        },
+        onConsoleMessage: (controller, consoleMessage) {
+          print('YouTube Player Console: ${consoleMessage.message}');
+        },
+        onLoadError: (controller, url, code, message) {
+          print('YouTube Player Load Error: $message (code: $code)');
+        },
+        shouldOverrideUrlLoading: (controller, navigationAction) async {
+          return NavigationActionPolicy.ALLOW;
         },
       ),
     );
@@ -274,14 +298,19 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'cc_lang_pref': '${controller!.flags.captionLanguage}',
                         'autoplay': ${boolean(value: controller!.flags.autoPlay)},
                         'start': ${controller!.flags.startAt},
-                        'end': ${controller!.flags.endAt}
+                        'end': ${controller!.flags.endAt},
+                        'origin': 'https://www.youtube.com'
                     },
                     events: {
                         onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
                         onStateChange: function(event) { sendPlayerStateChange(event.data); },
                         onPlaybackQualityChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackQualityChange', event.data); },
                         onPlaybackRateChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data); },
-                        onError: function(error) { window.flutter_inappwebview.callHandler('Errors', error.data); }
+                        onError: function(error) {
+                            console.log('YouTube Player Error:', error.data);
+                            handlePlayerError(error.data);
+                            window.flutter_inappwebview.callHandler('Errors', error.data);
+                        }
                     },
                 });
             }
@@ -292,6 +321,23 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 if (playerState == 1) {
                     startSendCurrentTimeInterval();
                     sendVideoData(player);
+                }
+            }
+
+            // Add error recovery mechanism
+            function handlePlayerError(errorCode) {
+                console.log('Handling YouTube error:', errorCode);
+                if (errorCode === 153) {
+                    // Try to reload the player with different parameters
+                    setTimeout(function() {
+                        if (player && player.loadVideoById) {
+                            console.log('Attempting to reload video after error 153');
+                            player.loadVideoById({
+                                videoId: '${controller!.initialVideoId}',
+                                startSeconds: ${controller!.flags.startAt}
+                            });
+                        }
+                    }, 1000);
                 }
             }
 
@@ -404,7 +450,11 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
   String boolean({required bool value}) => value == true ? "'1'" : "'0'";
 
-  String get userAgent => controller!.flags.forceHD
-      ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-      : '';
+  String get userAgent {
+    if (controller!.flags.forceHD) {
+      return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36';
+    }
+    // Use a Windows Chrome user agent for better compatibility on Windows
+    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  }
 }
