@@ -40,6 +40,34 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   /// Windows WebView2 requires different HTML loading approach.
   bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
 
+  /// Constructs a direct YouTube embed URL for Windows.
+  /// Windows WebView2 cannot render data: URLs properly, so we load
+  /// YouTube's embed page directly with parameters in the URL.
+  String get _windowsEmbedUrl {
+    final videoId = controller!.initialVideoId;
+    final flags = controller!.flags;
+    final params = <String, String>{
+      'controls': '0',
+      'playsinline': '1',
+      'enablejsapi': '1',
+      'fs': '0',
+      'rel': '0',
+      'showinfo': '0',
+      'iv_load_policy': '3',
+      'modestbranding': '1',
+      'cc_load_policy': flags.enableCaption ? '1' : '0',
+      'cc_lang_pref': flags.captionLanguage,
+      'autoplay': flags.autoPlay ? '1' : '0',
+      if (flags.startAt > 0) 'start': flags.startAt.toString(),
+      if (flags.endAt != null) 'end': flags.endAt.toString(),
+      'origin': 'https://www.youtube.com',
+    };
+    final queryString = params.entries
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+    return 'https://www.youtube.com/embed/$videoId?$queryString';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -78,8 +106,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
       ignoring: true,
       child: InAppWebView(
         key: widget.key,
-        // On Windows, initialData doesn't work properly with WebView2.
-        // We use initialUrlRequest with about:blank and load HTML in onWebViewCreated.
+        // On Windows, use YouTube's embed URL directly since WebView2
+        // cannot properly render HTML from data: URLs or loadData().
+        // For other platforms, use the IFrame API approach with initialData.
         initialData: _isWindowsDesktop
             ? null
             : InAppWebViewInitialData(
@@ -88,8 +117,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
                 mimeType: 'text/html',
               ),
-        initialUrlRequest:
-            _isWindowsDesktop ? URLRequest(url: WebUri('about:blank')) : null,
+        initialUrlRequest: _isWindowsDesktop
+            ? URLRequest(url: WebUri(_windowsEmbedUrl))
+            : null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
           mediaPlaybackRequiresUserGesture: false,
@@ -108,17 +138,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
           controller!.updateValue(
             controller!.value.copyWith(webViewController: webController),
           );
-
-          // On Windows, load the HTML content after webview is created.
-          // This approach works better with WebView2 than initialData.
-          if (_isWindowsDesktop) {
-            webController.loadData(
-              data: player,
-              mimeType: 'text/html',
-              encoding: 'utf-8',
-              baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
-            );
-          }
 
           webController
             ..addJavaScriptHandler(
