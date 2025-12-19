@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -83,21 +82,13 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         // On Windows, use YouTube's embed URL directly since WebView2
         // cannot properly render HTML from data: URLs or loadData().
         // For other platforms, use the IFrame API approach with initialData.
-        initialData: _isWindowsDesktop
-            ? null
-            : InAppWebViewInitialData(
-                data: player,
-                encoding: 'utf-8',
-                baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
-                mimeType: 'text/html',
-              ),
-        initialUrlRequest: _isWindowsDesktop
-            ? URLRequest(
-                url: WebUri(
-                  'data:text/html;charset=utf-8;base64,${base64Encode(const Utf8Encoder().convert(player))}',
-                ),
-              )
-            : null,
+        initialData: InAppWebViewInitialData(
+          data: player,
+          encoding: 'utf-8',
+          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+          mimeType: 'text/html',
+        ),
+        initialUrlRequest: null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
           mediaPlaybackRequiresUserGesture: false,
