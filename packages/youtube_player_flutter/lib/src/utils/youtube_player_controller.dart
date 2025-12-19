@@ -192,7 +192,7 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
   void load(String videoId, {int startAt = 0, int? endAt}) {
     if (videoId.contains('-')) {
       loadVideoByUrl(
-        mediaContentUrl: 'https://www.youtube.com/v/$videoId?version=3',
+        mediaContentUrl: 'https://www.youtube.com/v/$videoId?version=5',
         startAt: startAt,
         endAt: endAt,
       );
