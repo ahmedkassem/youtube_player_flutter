@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('www.youtube-nocookie.com')),
+          baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -247,30 +247,24 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
     <!DOCTYPE html>
     <html>
     <head>
-        <style>
-            html,
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #000000;
-                overflow: hidden;
-                position: fixed;
-                height: 100%;
-                width: 100%;
-                pointer-events: none;
-            }
-        </style>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+        <style>
+            html, body { margin: 0; padding: 0; background-color: #000000; overflow: hidden; position: fixed; height: 100%; width: 100%; pointer-events: none; }
+        </style>
     </head>
     <body>
         <div id="player"></div>
         <script>
+            // Initialize YouTube API
             var tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            
             var player;
             var timerId;
+            
+            // Global function called by YouTube API
             function onYouTubeIframeAPIReady() {
                 player = new YT.Player('player', {
                     height: '100%',
@@ -287,22 +281,32 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'modestbranding': 1,
                         'cc_load_policy': ${boolean(value: controller!.flags.enableCaption)},
                         'cc_lang_pref': '${controller!.flags.captionLanguage}',
-                        'autoplay': ${boolean(value: controller!.flags.autoPlay)},
+                        'autoplay': 1,  // Force autoplay to bypass restrictions
                         'start': ${controller!.flags.startAt},
                         'end': ${controller!.flags.endAt},
-                        'origin': 'https://www.youtube-nocookie.com',
-                        'widget_referrer': 'https://www.youtube-nocookie.com',
-                        'host': 'https://www.youtube-nocookie.com',
-                        'disablekb': 1,
-                        'playsinline': 1,
-                        'mute': ${boolean(value: controller!.flags.mute)},
-                        'hl': '${controller!.flags.captionLanguage}'
+                        'mute': 1,  // Start muted to bypass autoplay restrictions
+                        'origin': 'https://www.youtube.com'
                     },
                     events: {
-                        onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
-                        onStateChange: function(event) { sendPlayerStateChange(event.data); },
-                        onPlaybackQualityChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackQualityChange', event.data); },
-                        onPlaybackRateChange: function(event) { window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data); },
+                        onReady: function(event) {
+                            console.log('YouTube Player Ready');
+                            window.flutter_inappwebview.callHandler('Ready');
+                            // Unmute after a short delay if not explicitly muted
+                            if (!${boolean(value: controller!.flags.mute)}) {
+                                setTimeout(function() {
+                                    player.unMute();
+                                }, 1000);
+                            }
+                        },
+                        onStateChange: function(event) {
+                            sendPlayerStateChange(event.data);
+                        },
+                        onPlaybackQualityChange: function(event) {
+                            window.flutter_inappwebview.callHandler('PlaybackQualityChange', event.data);
+                        },
+                        onPlaybackRateChange: function(event) {
+                            window.flutter_inappwebview.callHandler('PlaybackRateChange', event.data);
+                        },
                         onError: function(error) {
                             console.log('YouTube Player Error:', error.data);
                             window.flutter_inappwebview.callHandler('Errors', error.data);
@@ -319,7 +323,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                     sendVideoData(player);
                 }
             }
-
 
             function sendVideoData(player) {
                 var videoData = {
@@ -357,16 +360,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 return '';
             }
 
-            function loadPlaylist(playlist, index, startAt) {
-                player.loadPlaylist(playlist, 'playlist', index, startAt);
-                return '';
-            }
-
-            function cuePlaylist(playlist, index, startAt) {
-                player.cuePlaylist(playlist, 'playlist', index, startAt);
-                return '';
-            }
-
             function mute() {
                 player.mute();
                 return '';
@@ -377,28 +370,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 return '';
             }
 
-            function toggleCaptions() {
-                var track = player.getOption('captions', 'track');
-                if (track && track.languageCode) {
-                    player.unloadModule('captions');
-                } else {
-                    player.loadModule('captions');
-                    player.setOption('captions', 'track', {});
-                }
-                return '';
-            }
-            function showCaptions() {
-                player.loadModule('captions');
-                player.setOption('captions', 'track', {
-                    languageCode: 'en' // ensure this is defined
-                });
-                return '';
-            }
-            function hideCaptions() {
-                player.unloadModule('captions');
-                return '';
-            }
-
             function setVolume(volume) {
                 player.setVolume(volume);
                 return '';
@@ -406,11 +377,6 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
             function seekTo(position, seekAhead) {
                 player.seekTo(position, seekAhead);
-                return '';
-            }
-
-            function setSize(width, height) {
-                player.setSize(width, height);
                 return '';
             }
 
