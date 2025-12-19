@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+          baseUrl: WebUri.uri(Uri.https('www.youtube.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -263,6 +263,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                     width: '100%',
                     videoId: '${!controller!.initialVideoId.contains('-') ? controller!.initialVideoId : ""}',
                     playerVars: {
+                        'origin': 'https://www.youtube.com',
                         'controls': 0,
                         'playsinline': 1,
                         'enablejsapi': 1,
