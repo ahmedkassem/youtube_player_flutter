@@ -36,9 +36,31 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
   bool _isPlayerReady = false;
   bool _onLoadStopCalled = false;
 
-  /// Returns true if running on Windows desktop (not web).
-  /// Windows WebView2 requires different HTML loading approach.
   bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
+
+  String get _windowsEmbedUrl {
+    final videoId = controller!.initialVideoId;
+    final flags = controller!.flags;
+    final params = <String, String>{
+      'controls': '0',
+      'playsinline': '1',
+      'enablejsapi': '1',
+      'fs': '0',
+      'rel': '0',
+      'showinfo': '0',
+      'iv_load_policy': '3',
+      'modestbranding': '1',
+      'cc_load_policy': flags.enableCaption ? '1' : '0',
+      'cc_lang_pref': flags.captionLanguage,
+      'autoplay': flags.autoPlay ? '1' : '0',
+      if (flags.startAt > 0) 'start': flags.startAt.toString(),
+      if (flags.endAt != null) 'end': flags.endAt.toString(),
+    };
+    final queryString = params.entries
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+    return 'https://www.youtube-nocookie.com/embed/$videoId?$queryString';
+  }
 
   @override
   void initState() {
@@ -82,13 +104,20 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         // On Windows, use YouTube's embed URL directly since WebView2
         // cannot properly render HTML from data: URLs or loadData().
         // For other platforms, use the IFrame API approach with initialData.
-        initialData: InAppWebViewInitialData(
-          data: player,
-          encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
-          mimeType: 'text/html',
-        ),
-        initialUrlRequest: null,
+        initialData: _isWindowsDesktop
+            ? null
+            : InAppWebViewInitialData(
+                data: player,
+                encoding: 'utf-8',
+                baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+                mimeType: 'text/html',
+              ),
+        initialUrlRequest: _isWindowsDesktop
+            ? URLRequest(
+                url: WebUri(_windowsEmbedUrl),
+                headers: {'Referer': 'https://www.youtube-nocookie.com/'},
+              )
+            : null,
         initialSettings: InAppWebViewSettings(
           userAgent: userAgent,
           mediaPlaybackRequiresUserGesture: false,
