@@ -196,61 +196,77 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
     String? jsCommand;
 
     if (methodString == 'play()') {
+      if (_isWindowsDesktop) {
+        updateValue(
+          value.copyWith(playerState: PlayerState.playing, isPlaying: true),
+        );
+      }
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.playVideo) p.playVideo();
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').play();
+        var p = document.getElementById('movie_player');
+        if (p && p.playVideo) { 
+          p.playVideo(); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.play();
         }
       ''';
     } else if (methodString == 'pause()') {
+      if (_isWindowsDesktop) {
+        updateValue(
+          value.copyWith(playerState: PlayerState.paused, isPlaying: false),
+        );
+      }
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.pauseVideo) p.pauseVideo();
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').pause();
+        var p = document.getElementById('movie_player');
+        if (p && p.pauseVideo) { 
+          p.pauseVideo(); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.pause();
         }
       ''';
     } else if (methodString == 'mute()') {
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.mute) p.mute();
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').muted = true;
+        var p = document.getElementById('movie_player');
+        if (p && p.mute) { 
+          p.mute(); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.muted = true;
         }
       ''';
     } else if (methodString == 'unMute()') {
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.unMute) p.unMute();
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').muted = false;
+        var p = document.getElementById('movie_player');
+        if (p && p.unMute) { 
+          p.unMute(); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.muted = false;
         }
       ''';
     } else if (methodString.startsWith('seekTo(')) {
       final match = RegExp(r'seekTo\(([^,]+)').firstMatch(methodString);
       final seconds = match?.group(1) ?? '0';
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.seekTo) p.seekTo($seconds, true);
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').currentTime = $seconds;
+        var p = document.getElementById('movie_player');
+        if (p && p.seekTo) { 
+          p.seekTo($seconds, true); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.currentTime = $seconds;
         }
       ''';
     } else if (methodString.startsWith('setVolume(')) {
       final match = RegExp(r'setVolume\((\d+)\)').firstMatch(methodString);
       final volume = match?.group(1) ?? '100';
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.setVolume) p.setVolume($volume);
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').volume = $volume / 100;
+        var p = document.getElementById('movie_player');
+        if (p && p.setVolume) { 
+          p.setVolume($volume); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.volume = $volume / 100;
         }
       ''';
     } else if (methodString.startsWith('setPlaybackRate(')) {
@@ -258,11 +274,12 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
           RegExp(r'setPlaybackRate\(([^)]+)\)').firstMatch(methodString);
       final rate = match?.group(1) ?? '1';
       jsCommand = '''
-        if (typeof yt !== 'undefined' && yt.player && yt.player.getPlayerByElement) {
-          var p = yt.player.getPlayerByElement(document.getElementById('player'));
-          if (p && p.setPlaybackRate) p.setPlaybackRate($rate);
-        } else if (document.querySelector('video')) {
-          document.querySelector('video').playbackRate = $rate;
+        var p = document.getElementById('movie_player');
+        if (p && p.setPlaybackRate) { 
+          p.setPlaybackRate($rate); 
+        } else {
+          var video = document.querySelector('video');
+          if (video) video.playbackRate = $rate;
         }
       ''';
     }

@@ -267,7 +267,11 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
           // so we consider the player ready when the page finishes loading.
           if (_isPlayerReady || _isWindowsDesktop) {
             controller!.updateValue(
-              controller!.value.copyWith(isReady: true),
+              controller!.value.copyWith(
+                isReady: true,
+                // On Windows, also set playerState to cued so play button shows
+                playerState: _isWindowsDesktop ? PlayerState.cued : null,
+              ),
             );
           }
         },
