@@ -74,7 +74,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialData: InAppWebViewInitialData(
           data: player,
           encoding: 'utf-8',
-          baseUrl: WebUri.uri(Uri.https('youtube-nocookie.com')),
+          baseUrl: WebUri.uri(Uri.https('www.youtube-nocookie.com')),
           mimeType: 'text/html',
         ),
         initialSettings: InAppWebViewSettings(
@@ -290,7 +290,13 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'autoplay': ${boolean(value: controller!.flags.autoPlay)},
                         'start': ${controller!.flags.startAt},
                         'end': ${controller!.flags.endAt},
-                        'origin': 'https://www.youtube.com'
+                        'origin': 'https://www.youtube-nocookie.com',
+                        'widget_referrer': 'https://www.youtube-nocookie.com',
+                        'host': 'https://www.youtube-nocookie.com',
+                        'disablekb': 1,
+                        'playsinline': 1,
+                        'mute': ${boolean(value: controller!.flags.mute)},
+                        'hl': '${controller!.flags.captionLanguage}'
                     },
                     events: {
                         onReady: function(event) { window.flutter_inappwebview.callHandler('Ready'); },
@@ -428,7 +434,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
     if (controller!.flags.forceHD) {
       return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36';
     }
-    // Use a more generic Chrome user agent that works better with YouTube embeds
-    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+    // Use default WebView user agent to avoid detection inconsistencies
+    return '';
   }
 }
