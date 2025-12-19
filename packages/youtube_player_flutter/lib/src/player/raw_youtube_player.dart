@@ -261,9 +261,8 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 player = new YT.Player('player', {
                     height: '100%',
                     width: '100%',
-                    videoId: '${controller!.initialVideoId}',
+                    videoId: '${!controller!.initialVideoId.contains('-') ? controller!.initialVideoId : ""}',
                     playerVars: {
-                        'origin': 'https://youtube-nocookie.com',
                         'controls': 0,
                         'playsinline': 1,
                         'enablejsapi': 1,
@@ -283,6 +282,13 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                             var iframe = document.getElementById('player');
                             if (iframe) {
                                 iframe.setAttribute('referrerPolicy', 'strict-origin-when-cross-origin');
+                            }
+                            if ('${controller!.initialVideoId}'.indexOf('-') > -1) {
+                                cueVideoByUrl({
+                                    mediaContentUrl: 'https://www.youtube.com/v/${controller!.initialVideoId}?version=5',
+                                    startSeconds: ${controller!.flags.startAt},
+                                    endSeconds: ${controller!.flags.endAt ?? 'undefined'}
+                                });
                             }
                             window.flutter_inappwebview.callHandler('Ready');
                         },
