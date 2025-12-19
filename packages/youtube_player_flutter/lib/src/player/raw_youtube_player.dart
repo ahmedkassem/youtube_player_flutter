@@ -65,7 +65,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
     final queryString = params.entries
         .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
         .join('&');
-    return 'https://www.youtube.com/embed/$videoId?$queryString';
+    return 'https://www.youtube-nocookie.com/embed/$videoId?$queryString';
   }
 
   @override
@@ -121,7 +121,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
         initialUrlRequest: _isWindowsDesktop
             ? URLRequest(
                 url: WebUri(_windowsEmbedUrl),
-                headers: {'Referer': 'https://www.youtube.com/'},
+                headers: {'Referer': 'https://www.youtube-nocookie.com/'},
               )
             : null,
         initialSettings: InAppWebViewSettings(
@@ -462,7 +462,12 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
 
   String boolean({required bool value}) => value == true ? "'1'" : "'0'";
 
-  String get userAgent => controller!.flags.forceHD
-      ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-      : '';
+  String get userAgent {
+    if (_isWindowsDesktop) {
+      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    }
+    return controller!.flags.forceHD
+        ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+        : '';
+  }
 }
