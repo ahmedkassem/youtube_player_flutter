@@ -263,6 +263,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                     width: '100%',
                     videoId: '${controller!.initialVideoId}',
                     playerVars: {
+                        'origin': 'https://youtube-nocookie.com',
                         'controls': 0,
                         'playsinline': 1,
                         'enablejsapi': 1,
