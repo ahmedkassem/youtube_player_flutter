@@ -292,7 +292,7 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                             console.log('YouTube Player Ready');
                             window.flutter_inappwebview.callHandler('Ready');
                             // Unmute after a short delay if not explicitly muted
-                            if (!${boolean(value: controller!.flags.mute)}) {
+                            if (!${controller!.flags.mute}) {
                                 setTimeout(function() {
                                     player.unMute();
                                 }, 1000);
