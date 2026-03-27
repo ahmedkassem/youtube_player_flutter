@@ -46,7 +46,7 @@ class _PlaybackQualityButtonState extends State<PlaybackQualityButton> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('PlaybackQualityButton: build called');
+    print('=== PlaybackQualityButton: build called ===');
     return PopupMenuButton<String>(
       onSelected: (quality) {
         debugPrint(
