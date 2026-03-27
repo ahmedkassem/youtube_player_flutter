@@ -295,7 +295,6 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
   /// The quality change may take effect when the player buffers new data
   /// or when playback resumes after being paused.
   void setPlaybackQuality(String quality) {
-    log('setPlaybackQuality called: quality=$quality, isReady=${value.isReady}');
     _callMethod("setPlaybackQuality('$quality')");
     // Update the UI to show the selected quality immediately
     // even if YouTube doesn't actually change it right away

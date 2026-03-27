@@ -386,21 +386,7 @@ function setPlaybackRate(rate) {
 }
 
 function setPlaybackQuality(quality) {
-  console.log('setPlaybackQuality called with: ' + quality);
-  console.log('Player state: ' + player.getPlayerState());
-  console.log('Available quality levels: ' + player.getAvailableQualityLevels());
-  
-  // Store the desired quality
-  window._desiredQuality = quality;
-  
-  // YouTube's setPlaybackQuality is unreliable on embedded players
-  // The best approach is to set the playback quality and it may take effect
-  // when the player needs to buffer more data
   player.setPlaybackQuality(quality);
-  
-  // Log immediate result
-  console.log('Immediately after setPlaybackQuality: ' + player.getPlaybackQuality());
-  
   return '';
 }
 

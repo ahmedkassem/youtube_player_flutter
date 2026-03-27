@@ -46,47 +46,32 @@ class _PlaybackQualityButtonState extends State<PlaybackQualityButton> {
 
   @override
   Widget build(BuildContext context) {
-    print('=== PlaybackQualityButton: build called ===');
     return PopupMenuButton<String>(
-      onSelected: (quality) {
-        debugPrint(
-            'PlaybackQualityButton: onSelected called with quality=$quality');
-        _controller.setPlaybackQuality(quality);
-      },
+      onSelected: _controller.setPlaybackQuality,
       tooltip: 'Playback Quality',
-      itemBuilder: (context) {
-        debugPrint('PlaybackQualityButton: itemBuilder called');
-        return [
-          _popUpItem('Auto', 'auto'),
-          _popUpItem('2160p', 'hd2160'),
-          _popUpItem('1440p', 'hd1440'),
-          _popUpItem('1080p', 'hd1080'),
-          _popUpItem('720p', 'hd720'),
-          _popUpItem('480p', 'large'),
-          _popUpItem('360p', 'medium'),
-          _popUpItem('240p', 'small'),
-        ];
-      },
-      child: GestureDetector(
-        onTap: () {
-          debugPrint('PlaybackQualityButton: Settings icon tapped!');
-        },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-          child: widget.icon ??
-              const Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: 20.0,
-              ),
-        ),
+      itemBuilder: (context) => [
+        _popUpItem('Auto', 'auto'),
+        _popUpItem('2160p', 'hd2160'),
+        _popUpItem('1440p', 'hd1440'),
+        _popUpItem('1080p', 'hd1080'),
+        _popUpItem('720p', 'hd720'),
+        _popUpItem('480p', 'large'),
+        _popUpItem('360p', 'medium'),
+        _popUpItem('240p', 'small'),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
+        child: widget.icon ??
+            const Icon(
+              Icons.settings,
+              color: Colors.white,
+              size: 20.0,
+            ),
       ),
     );
   }
 
   PopupMenuEntry<String> _popUpItem(String text, String quality) {
-    // Note: If playbackQuality is null (initial state), no item will be checked
-    // until a quality event fires from YouTube. This is expected behavior.
     return CheckedPopupMenuItem(
       checked: _controller.value.playbackQuality == quality,
       value: quality,
