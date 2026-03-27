@@ -287,8 +287,10 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
   /// Sets the suggested playback quality for the current video.
   /// The player will attempt to use the closest available quality if the
   /// requested quality is not available.
-  void setPlaybackQuality(String quality) =>
-      _callMethod("setPlaybackQuality('$quality')");
+  void setPlaybackQuality(String quality) {
+    log('setPlaybackQuality called: quality=$quality, isReady=${value.isReady}');
+    _callMethod("setPlaybackQuality('$quality')");
+  }
 
   /// Toggles the player's full screen mode.
   void toggleFullScreenMode() {
