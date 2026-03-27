@@ -141,6 +141,8 @@ class _PlaybackQualityButtonState extends State<PlaybackQualityButton> {
       tooltip: 'Playback Quality',
       itemBuilder: (context) => [
         _popUpItem('Auto', 'auto'),
+        _popUpItem('2160p', 'hd2160'),
+        _popUpItem('1440p', 'hd1440'),
         _popUpItem('1080p', 'hd1080'),
         _popUpItem('720p', 'hd720'),
         _popUpItem('480p', 'large'),
@@ -194,7 +196,7 @@ const PlaybackQualityButton(),
 
 ## Design Decisions
 
-1. **Quality ordering**: Highest to lowest in popup menu (1080p → 240p) - matches YouTube's native UX
+1. **Quality ordering**: Highest to lowest in popup menu (2160p → 240p) - matches YouTube's native UX
 2. **Default icon**: `Icons.settings` - standard icon for quality/settings controls. While `PlaybackSpeedButton` uses a custom asset (`speedometer.webp`), `Icons.settings` is a reasonable deviation since quality settings typically use a gear icon across platforms, and adding a new asset would require pubspec.yaml changes.
 3. **No `getAvailableQualityLevels`**: YouTube player handles availability automatically; requested quality falls back to best available
 4. **String constants**: YouTube API uses string quality identifiers (e.g., `'hd720'`), not integers
