@@ -380,12 +380,17 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 return '';
             }
 
-            function setPlaybackRate(rate) {
-                player.setPlaybackRate(rate);
-                return '';
-            }
+function setPlaybackRate(rate) {
+  player.setPlaybackRate(rate);
+  return '';
+}
 
-            function setTopMargin(margin) {
+function setPlaybackQuality(quality) {
+  player.setPlaybackQuality(quality);
+  return '';
+}
+
+function setTopMargin(margin) {
                 document.getElementById("player").style.marginTop = margin;
                 return '';
             }
