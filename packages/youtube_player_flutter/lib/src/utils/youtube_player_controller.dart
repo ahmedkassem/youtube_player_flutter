@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+import '../enums/playback_quality.dart';
 import '../enums/playback_rate.dart';
 import '../enums/player_state.dart';
 import '../utils/youtube_meta_data.dart';
@@ -282,6 +283,12 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
 
   /// Sets the playback speed for the video.
   void setPlaybackRate(double rate) => _callMethod('setPlaybackRate($rate)');
+
+  /// Sets the suggested playback quality for the current video.
+  /// The player will attempt to use the closest available quality if the
+  /// requested quality is not available.
+  void setPlaybackQuality(String quality) =>
+      _callMethod('setPlaybackQuality("$quality")');
 
   /// Toggles the player's full screen mode.
   void toggleFullScreenMode() {
