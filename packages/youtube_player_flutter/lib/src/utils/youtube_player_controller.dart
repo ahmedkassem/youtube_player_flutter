@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import '../enums/playback_quality.dart';
 import '../enums/playback_rate.dart';
 import '../enums/player_state.dart';
 import '../utils/youtube_meta_data.dart';
@@ -283,23 +282,6 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
 
   /// Sets the playback speed for the video.
   void setPlaybackRate(double rate) => _callMethod('setPlaybackRate($rate)');
-
-  /// Sets the suggested playback quality for the current video.
-  ///
-  /// Note: YouTube's IFrame API treats this as a suggestion, not a command.
-  /// The actual quality may differ based on:
-  /// - Network bandwidth conditions
-  /// - Available quality levels for the video
-  /// - Player size and device capabilities
-  ///
-  /// The quality change may take effect when the player buffers new data
-  /// or when playback resumes after being paused.
-  void setPlaybackQuality(String quality) {
-    _callMethod("setPlaybackQuality('$quality')");
-    // Update the UI to show the selected quality immediately
-    // even if YouTube doesn't actually change it right away
-    updateValue(value.copyWith(playbackQuality: quality));
-  }
 
   /// Toggles the player's full screen mode.
   void toggleFullScreenMode() {

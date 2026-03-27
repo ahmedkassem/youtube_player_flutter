@@ -8,4 +8,3 @@ export 'playback_speed_button.dart';
 export 'progress_bar.dart';
 export 'touch_shutter.dart';
 export 'youtube_player_builder.dart';
-export 'playback_quality_button.dart';
