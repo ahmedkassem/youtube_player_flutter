@@ -47,7 +47,11 @@ class _PlaybackQualityButtonState extends State<PlaybackQualityButton> {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      onSelected: _controller.setPlaybackQuality,
+      onSelected: (quality) {
+        debugPrint(
+            'PlaybackQualityButton: onSelected called with quality=$quality');
+        _controller.setPlaybackQuality(quality);
+      },
       tooltip: 'Playback Quality',
       itemBuilder: (context) => [
         _popUpItem('Auto', 'auto'),
