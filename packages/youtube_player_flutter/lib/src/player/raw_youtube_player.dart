@@ -386,7 +386,11 @@ function setPlaybackRate(rate) {
 }
 
 function setPlaybackQuality(quality) {
+  console.log('setPlaybackQuality called with: ' + quality);
+  console.log('Player state: ' + player.getPlayerState());
+  console.log('Available quality levels: ' + player.getAvailableQualityLevels());
   player.setPlaybackQuality(quality);
+  console.log('After setPlaybackQuality, current quality: ' + player.getPlaybackQuality());
   return '';
 }
 
