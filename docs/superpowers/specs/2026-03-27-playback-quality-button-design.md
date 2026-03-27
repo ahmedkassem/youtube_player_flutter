@@ -19,15 +19,15 @@ Add a quality change button to the youtube_player_flutter package, allowing user
 
 ### Files to Create
 
-1. **`lib/src/enums/playback_quality.dart`** - Quality level constants and display name mapping
+1. **`packages/youtube_player_flutter/lib/src/enums/playback_quality.dart`** - Quality level constants and display name mapping
+2. **`packages/youtube_player_flutter/lib/src/widgets/playback_quality_button.dart`** - Quality button widget
 
 ### Files to Modify
 
-1. **`lib/src/utils/youtube_player_controller.dart`** - Add `setPlaybackQuality()` method
-2. **`lib/src/widgets/playback_quality_button.dart`** - New widget (create file)
-3. **`lib/src/widgets/widgets.dart`** - Export new widget
-4. **`lib/src/player/raw_youtube_player.dart`** - Add `setPlaybackQuality` JS function
-5. **`lib/src/player/youtube_player.dart`** - Add button to bottom bar
+1. **`packages/youtube_player_flutter/lib/src/utils/youtube_player_controller.dart`** - Add `setPlaybackQuality()` method
+2. **`packages/youtube_player_flutter/lib/src/widgets/widgets.dart`** - Export new widget
+3. **`packages/youtube_player_flutter/lib/src/player/raw_youtube_player.dart`** - Add `setPlaybackQuality` JS function
+4. **`packages/youtube_player_flutter/lib/src/player/youtube_player.dart`** - Add button to bottom bar
 
 ### Existing Infrastructure (No Changes Needed)
 
@@ -186,10 +186,12 @@ const PlaybackQualityButton(),
 ## Design Decisions
 
 1. **Quality ordering**: Highest to lowest in popup menu (1080p → 240p) - matches YouTube's native UX
-2. **Default icon**: `Icons.settings` - standard icon for quality/settings controls
+2. **Default icon**: `Icons.settings` - standard icon for quality/settings controls. While `PlaybackSpeedButton` uses a custom asset (`speedometer.webp`), `Icons.settings` is a reasonable deviation since quality settings typically use a gear icon across platforms, and adding a new asset would require pubspec.yaml changes.
 3. **No `getAvailableQualityLevels`**: YouTube player handles availability automatically; requested quality falls back to best available
 4. **String constants**: YouTube API uses string quality identifiers (e.g., `'hd720'`), not integers
 5. **Always visible**: No opt-in flag; button appears by default in bottom bar
+6. **Null-safe quality check**: The `CheckedPopupMenuItem` comparison `_controller.value.playbackQuality == quality` handles null safely - if `playbackQuality` is null, no item will be checked until a quality event fires from YouTube.
+7. **Pre-ready calls**: If `setPlaybackQuality` is called before `isReady`, the existing `_callMethod` pattern logs "The controller is not ready for method calls" and does nothing. This is consistent with other methods like `play()` and `pause()`.
 
 ## Testing Considerations
 
