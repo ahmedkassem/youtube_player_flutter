@@ -120,7 +120,7 @@ git commit -m "feat: add PlaybackQuality enum for quality level constants"
 - Modify: `packages/youtube_player_flutter/lib/src/utils/youtube_player_controller.dart` (after line 284)
 
 - [ ] **Step 1: Add import for PlaybackQuality**
-At line 11, after the existing imports, add:
+After line 11 (after `import '../enums/playback_rate.dart';`), add:
 ```dart
 import '../enums/playback_quality.dart';
 ```
@@ -151,10 +151,10 @@ git commit -m "feat: add setPlaybackQuality method to YoutubePlayerController"
 ## Task 3: Add JavaScript setPlaybackQuality Function
 
 **Files:**
-- Modify: `packages/youtube_player_flutter/lib/src/player/raw_youtube_player.dart` (after line 386)
+- Modify: `packages/youtube_player_flutter/lib/src/player/raw_youtube_player.dart`
 
-- [ ] **Step 1: Add JavaScript function**
-After line 386 (after `setPlaybackRate` function in the embedded HTML), add:
+- [ ] **Step 1: Add JavaScript function to the embedded HTML template**
+Inside the `player` string template (the HTML/JavaScript embedded in the Dart file), after the `setPlaybackRate` function (around line 386), add the following JavaScript code:
 ```dart
 
 function setPlaybackQuality(quality) {
@@ -162,6 +162,8 @@ function setPlaybackQuality(quality) {
   return '';
 }
 ```
+
+**Note:** This is JavaScript code being added inside the Dart multi-line string template (`player => '''...'''`). The function is part of the embedded HTML that runs in the WebView.
 
 - [ ] **Step 2: Verify syntax**
 Run: `cd packages/youtube_player_flutter && dart analyze lib/src/player/raw_youtube_player.dart`
@@ -256,6 +258,8 @@ class _PlaybackQualityButtonState extends State<PlaybackQualityButton> {
   }
 
   PopupMenuEntry<String> _popUpItem(String text, String quality) {
+    // Note: If playbackQuality is null (initial state), no item will be checked
+    // until a quality event fires from YouTube. This is expected behavior.
     return CheckedPopupMenuItem(
       checked: _controller.value.playbackQuality == quality,
       value: quality,
@@ -387,3 +391,26 @@ After implementation, verify:
 - [ ] PlaybackQuality enum is accessible from main library
 - [ ] PlaybackQualityButton is exported from widgets.dart
 - [ ] Button appears in bottom bar after PlaybackSpeedButton
+
+---
+
+## Task 9: Manual Functional Verification
+
+- [ ] **Step 1: Run the example app**
+Run: `cd packages/youtube_player_flutter/example && flutter run`
+Expected: App launches with a video player
+
+- [ ] **Step 2: Test quality button visibility**
+1. Play a video in the example app
+2. Tap on the video to show controls
+3. Verify the quality button (gear icon) appears in the bottom bar next to the speed button
+
+- [ ] **Step 3: Test quality selection**
+1. Tap the quality button
+2. Verify popup shows: Auto, 2160p, 1440p, 1080p, 720p, 480p, 360p, 240p
+3. Select a quality level (e.g., 720p)
+4. Verify popup closes and quality is applied to the video
+
+- [ ] **Step 4: Verify checked state**
+1. Tap the quality button again
+2. Verify the previously selected quality shows a checkmark
