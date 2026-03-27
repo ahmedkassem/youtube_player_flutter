@@ -28,6 +28,7 @@ Add a quality change button to the youtube_player_flutter package, allowing user
 2. **`packages/youtube_player_flutter/lib/src/widgets/widgets.dart`** - Export new widget
 3. **`packages/youtube_player_flutter/lib/src/player/raw_youtube_player.dart`** - Add `setPlaybackQuality` JS function
 4. **`packages/youtube_player_flutter/lib/src/player/youtube_player.dart`** - Add button to bottom bar
+5. **`packages/youtube_player_flutter/lib/youtube_player_flutter.dart`** - Export `PlaybackQuality` enum from main library
 
 ### Existing Infrastructure (No Changes Needed)
 
@@ -175,9 +176,17 @@ Add to `widgets.dart`:
 export 'playback_quality_button.dart';
 ```
 
-### 6. Bottom Bar Integration
+### 6. Main Library Export
 
-Add to bottom bar in `youtube_player.dart` (after `PlaybackSpeedButton`):
+Add to `youtube_player_flutter.dart`:
+
+```dart
+export 'src/enums/playback_quality.dart';
+```
+
+### 7. Bottom Bar Integration
+
+Add to bottom bar in `youtube_player.dart` (after `PlaybackSpeedButton` around line 404):
 
 ```dart
 const PlaybackQualityButton(),
