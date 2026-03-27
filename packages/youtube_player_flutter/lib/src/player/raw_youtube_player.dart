@@ -389,8 +389,27 @@ function setPlaybackQuality(quality) {
   console.log('setPlaybackQuality called with: ' + quality);
   console.log('Player state: ' + player.getPlayerState());
   console.log('Available quality levels: ' + player.getAvailableQualityLevels());
+  
+  // Store the desired quality for later use
+  window._desiredQuality = quality;
+  
+  // Try to set quality immediately
   player.setPlaybackQuality(quality);
-  console.log('After setPlaybackQuality, current quality: ' + player.getPlaybackQuality());
+  
+  // If video is paused, we need to reload the video to apply quality
+  // This is a workaround for YouTube's adaptive streaming limitation
+  if (player.getPlayerState() === 2) { // paused
+    console.log('Video is paused, quality change may not take effect until playback resumes');
+  }
+  
+  // Also try seeking to current position to force quality change
+  var currentTime = player.getCurrentTime();
+  player.seekTo(currentTime, true);
+  
+  setTimeout(function() {
+    console.log('After setPlaybackQuality + seekTo, current quality: ' + player.getPlaybackQuality());
+  }, 500);
+  
   return '';
 }
 
