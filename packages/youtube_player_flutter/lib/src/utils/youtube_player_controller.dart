@@ -285,11 +285,21 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
   void setPlaybackRate(double rate) => _callMethod('setPlaybackRate($rate)');
 
   /// Sets the suggested playback quality for the current video.
-  /// The player will attempt to use the closest available quality if the
-  /// requested quality is not available.
+  ///
+  /// Note: YouTube's IFrame API treats this as a suggestion, not a command.
+  /// The actual quality may differ based on:
+  /// - Network bandwidth conditions
+  /// - Available quality levels for the video
+  /// - Player size and device capabilities
+  ///
+  /// The quality change may take effect when the player buffers new data
+  /// or when playback resumes after being paused.
   void setPlaybackQuality(String quality) {
     log('setPlaybackQuality called: quality=$quality, isReady=${value.isReady}');
     _callMethod("setPlaybackQuality('$quality')");
+    // Update the UI to show the selected quality immediately
+    // even if YouTube doesn't actually change it right away
+    updateValue(value.copyWith(playbackQuality: quality));
   }
 
   /// Toggles the player's full screen mode.
