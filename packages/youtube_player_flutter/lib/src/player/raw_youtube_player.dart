@@ -249,11 +249,23 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
     <head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
         <style>
-            html, body { margin: 0; padding: 0; background-color: #000000; overflow: hidden; position: fixed; height: 100%; width: 100%; pointer-events: none; }
+            html, body { margin: 0; padding: 0; background-color: #000000; overflow: hidden; position: fixed; height: 100%; width: 100%; }
+            #player-container { width: 100%; height: 100%; overflow: hidden; position: relative; }
+            /* Oversize iframe to clip YouTube logo, title, share button (csPlayer technique) */
+            #player-container iframe {
+                width: 2400%;
+                height: 100%;
+                margin-left: -1149.95%;
+                position: absolute;
+                border: none;
+                outline: none;
+            }
         </style>
     </head>
     <body>
-        <div id="player"></div>
+        <div id="player-container">
+            <div id="player"></div>
+        </div>
         <script>
             // Initialize YouTube API
             var tag = document.createElement('script');
@@ -285,11 +297,15 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                         'start': ${controller!.flags.startAt},
                         'end': ${controller!.flags.endAt},
                         'mute': 1,  // Start muted to bypass autoplay restrictions
-                        'origin': 'https://www.youtube.com'
+                        'origin': 'https://www.youtube.com',
+                        'disablekb': 1
                     },
                     events: {
                         onReady: function(event) {
                             console.log('YouTube Player Ready');
+                            // Remove caption modules to prevent overlays
+                            try { player.unloadModule('captions'); } catch(e) {}
+                            try { player.unloadModule('cc'); } catch(e) {}
                             window.flutter_inappwebview.callHandler('Ready');
                             // Unmute after a short delay if not explicitly muted
                             if (!${controller!.flags.mute}) {
@@ -321,6 +337,9 @@ class _RawYoutubePlayerState extends State<RawYoutubePlayer>
                 if (playerState == 1) {
                     startSendCurrentTimeInterval();
                     sendVideoData(player);
+                    // Keep removing caption modules on play
+                    try { player.unloadModule('captions'); } catch(e) {}
+                    try { player.unloadModule('cc'); } catch(e) {}
                 }
             }
 
